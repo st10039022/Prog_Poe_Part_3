@@ -26,6 +26,7 @@ class CategoriesFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // inflate the layout and set up view binding
         _binding = FragmentCategoriesBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -33,14 +34,17 @@ class CategoriesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // set up the adapter with an empty list
         adapter = CategoryAdapter(emptyList())
         binding.categoryRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.categoryRecyclerView.adapter = adapter
 
+        // open add category screen when fab is clicked
         binding.addCategoryFab.setOnClickListener {
             startActivity(Intent(requireContext(), AddCategoryActivity::class.java))
         }
 
+        // load categories from database
         loadCategories()
     }
 
@@ -49,6 +53,7 @@ class CategoriesFragment : Fragment() {
             val db = AppDatabase.getDatabase(requireContext())
             val categories = db.categoryDao().getAllCategories()
 
+            // update adapter on the main thread
             withContext(Dispatchers.Main) {
                 adapter.updateData(categories)
             }
@@ -57,11 +62,13 @@ class CategoriesFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+        // reload categories when returning to the screen
         loadCategories()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        // clear binding when view is destroyed
         _binding = null
     }
 }

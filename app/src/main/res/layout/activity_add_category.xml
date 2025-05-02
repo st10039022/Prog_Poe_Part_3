@@ -29,11 +29,12 @@
     <Spinner
         android:id="@+id/categoryTypeSpinner"
         android:layout_width="match_parent"
-        android:layout_height="64dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:backgroundTint="@android:color/white"
         android:popupBackground="@android:color/white"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
+        android:textAlignment="center"
+        android:theme="@style/SpinnerTheme.WhiteText"/>
 
     <Button
         android:id="@+id/saveCategoryButton"

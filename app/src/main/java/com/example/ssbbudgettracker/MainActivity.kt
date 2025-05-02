@@ -14,7 +14,6 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Load default fragment
         loadFragment(DashboardFragment())
 
         binding.bottomNav.setOnItemSelectedListener { menuItem ->
@@ -23,6 +22,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_expenses -> loadFragment(ExpensesFragment())
                 R.id.nav_income -> loadFragment(IncomeFragment())
                 R.id.nav_categories -> loadFragment(CategoriesFragment())
+                R.id.nav_goals -> loadFragment(GoalsFragment()) // ✅ ADDED
             }
             true
         }

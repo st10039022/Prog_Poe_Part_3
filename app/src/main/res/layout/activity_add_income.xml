@@ -24,7 +24,7 @@
             android:id="@+id/incomeCategorySpinner"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:backgroundTint="@android:color/white"/>
+            android:backgroundTint="@android:color/white" />
 
         <EditText
             android:id="@+id/incomeAmountEditText"
@@ -51,12 +51,13 @@
             android:id="@+id/incomeDateEditText"
             android:layout_width="match_parent"
             android:layout_height="64dp"
-            android:hint="Select Date"
+            android:hint="Date"
             android:focusable="false"
+            android:clickable="false"
             android:textColor="@android:color/white"
             android:textColorHint="@android:color/white"
             android:backgroundTint="@android:color/white"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp" />
 
         <Button
             android:id="@+id/saveIncomeButton"

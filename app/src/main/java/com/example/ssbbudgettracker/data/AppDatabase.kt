@@ -17,6 +17,7 @@ import androidx.room.RoomDatabase
     version = 4
 )
 abstract class AppDatabase : RoomDatabase() {
+    // these provide access to each dao
     abstract fun userDao(): UserDao
     abstract fun categoryDao(): CategoryDao
     abstract fun expenseDao(): ExpenseDao
@@ -25,15 +26,17 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun incomeCategoryDao(): IncomeCategoryDao
 
     companion object {
+        // holds the single instance of the database
         @Volatile private var INSTANCE: AppDatabase? = null
 
+        // this creates or returns the database instance
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
                     "ssb_database"
-                ).fallbackToDestructiveMigration().build()
+                ).fallbackToDestructiveMigration().build()// clears and resets db on version change
                 INSTANCE = instance
                 return instance
             }

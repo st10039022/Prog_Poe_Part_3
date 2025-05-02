@@ -5,13 +5,25 @@
     android:layout_height="match_parent"
     android:background="@color/ssb_blue">
 
+    <TextView
+        android:id="@+id/incomeHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your Income"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:layout_margin="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/incomeRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="16dp"
-        android:layout_above="@+id/addIncomeFab"
-        android:layout_alignParentTop="true" />
+        android:layout_below="@id/incomeHeader"
+        android:layout_above="@+id/addIncomeFab" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addIncomeFab"
@@ -21,6 +33,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="16dp"
+        android:contentDescription="Add income"
         app:backgroundTint="@color/ssb_gold"
         app:tint="@color/ssb_blue" />
 </RelativeLayout>

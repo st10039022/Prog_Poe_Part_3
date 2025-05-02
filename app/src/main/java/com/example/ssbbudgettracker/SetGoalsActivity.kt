@@ -20,28 +20,33 @@ class SetGoalsActivity : AppCompatActivity() {
         binding = ActivitySetGoalsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val db = AppDatabase.getDatabase(this)
+        binding.saveGoalButton.setOnClickListener {
+            val minGoalText = binding.minGoalEditText.text.toString()
+            val maxGoalText = binding.maxGoalEditText.text.toString()
 
-        lifecycleScope.launch {
-            val goals = withContext(Dispatchers.IO) { db.goalDao().getGoals() }
-            goals?.let {
-                binding.minGoalEditText.setText(it.minAmount.toString())
-                binding.maxGoalEditText.setText(it.maxAmount.toString())
+            if (minGoalText.isEmpty() || maxGoalText.isEmpty()) {
+                Toast.makeText(this, "Please fill in both fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
-        }
 
-        binding.saveGoalsButton.setOnClickListener {
-            val min = binding.minGoalEditText.text.toString().toDoubleOrNull()
-            val max = binding.maxGoalEditText.text.toString().toDoubleOrNull()
+            val minGoal = minGoalText.toDouble()
+            val maxGoal = maxGoalText.toDouble()
 
-            if (min != null && max != null) {
-                val goal = GoalEntity(minAmount = min, maxAmount = max)
-                lifecycleScope.launch(Dispatchers.IO) {
-                    db.goalDao().setGoals(goal)
+            if (minGoal > maxGoal) {
+                Toast.makeText(this, "Minimum cannot be greater than maximum", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val goal = GoalEntity(id = 1, minAmount = minGoal, maxAmount = maxGoal)
+
+            lifecycleScope.launch(Dispatchers.IO) {
+                val db = AppDatabase.getDatabase(applicationContext)
+                db.goalDao().insertGoal(goal)
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@SetGoalsActivity, "Goals saved successfully", Toast.LENGTH_SHORT).show()
                     finish()
                 }
-            } else {
-                Toast.makeText(this, "Please enter valid amounts", Toast.LENGTH_SHORT).show()
             }
         }
     }

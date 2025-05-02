@@ -1,6 +1,6 @@
 package com.example.ssbbudgettracker
 
-import android.app.DatePickerDialog
+// import necessary libraries and packages
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -11,75 +11,79 @@ import com.example.ssbbudgettracker.data.IncomeEntity
 import com.example.ssbbudgettracker.databinding.ActivityAddIncomeBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
+// activity to add income
 class AddIncomeActivity : AppCompatActivity() {
 
+    // view binding variable
     private lateinit var binding: ActivityAddIncomeBinding
-    private var selectedDate: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // initialize view binding
         binding = ActivityAddIncomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val db = AppDatabase.getDatabase(this)
+        // load income categories from database
+        loadIncomeCategories()
 
-        // Load categories
-        lifecycleScope.launch(Dispatchers.IO) {
-            val categories = db.incomeCategoryDao().getAllCategories().map { it.name }
-            runOnUiThread {
-                if (categories.isNotEmpty()) {
-                    val adapter = ArrayAdapter(this@AddIncomeActivity, R.layout.spinner_item, categories)
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                    binding.incomeCategorySpinner.adapter = adapter
-                } else {
-                    Toast.makeText(this@AddIncomeActivity, "Please add income categories first", Toast.LENGTH_LONG).show()
+        // set current date in the date field
+        val currentDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        binding.incomeDateEditText.setText(currentDate)
+
+        // handle save button click
+        binding.saveIncomeButton.setOnClickListener {
+            val category = binding.incomeCategorySpinner.selectedItem?.toString() ?: ""
+            val amountText = binding.incomeAmountEditText.text.toString()
+            val description = binding.incomeDescriptionEditText.text.toString()
+            val date = currentDate
+
+            // check if required fields are filled
+            if (category.isEmpty() || amountText.isEmpty()) {
+                Toast.makeText(this, "please enter all required fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // create income object
+            val income = IncomeEntity(
+                category = category,
+                amount = amountText.toDouble(),
+                description = description,
+                date = date
+            )
+
+            // insert income into database on background thread
+            lifecycleScope.launch(Dispatchers.IO) {
+                val db = AppDatabase.getDatabase(applicationContext)
+                db.incomeDao().insertIncome(income)
+
+                // show toast and close screen on main thread
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@AddIncomeActivity, "income saved", Toast.LENGTH_SHORT).show()
                     finish()
                 }
             }
         }
+    }
 
-        val calendar = Calendar.getInstance()
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        selectedDate = dateFormat.format(calendar.time)
-        binding.incomeDateEditText.setText(selectedDate)
+    // load income categories from the database and set to spinner
+    private fun loadIncomeCategories() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = AppDatabase.getDatabase(applicationContext)
+            val categories = db.categoryDao().getCategoriesByType("Income")
+            val categoryList = categories.map { it.name }
 
-        binding.incomeDateEditText.setOnClickListener {
-            val dpd = DatePickerDialog(
-                this,
-                { _, year, month, day ->
-                    val selected = Calendar.getInstance()
-                    selected.set(year, month, day)
-                    selectedDate = dateFormat.format(selected.time)
-                    binding.incomeDateEditText.setText(selectedDate)
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-            )
-            dpd.show()
-        }
-
-        binding.saveIncomeButton.setOnClickListener {
-            val category = binding.incomeCategorySpinner.selectedItem?.toString() ?: ""
-            val amount = binding.incomeAmountEditText.text.toString().toDoubleOrNull()
-            val description = binding.incomeDescriptionEditText.text.toString()
-
-            if (category.isNotEmpty() && amount != null && description.isNotEmpty()) {
-                val income = IncomeEntity(
-                    category = category,
-                    amount = amount,
-                    description = description,
-                    date = selectedDate
+            withContext(Dispatchers.Main) {
+                val adapter = ArrayAdapter(
+                    this@AddIncomeActivity,
+                    R.layout.spinner_item,
+                    categoryList
                 )
-                lifecycleScope.launch(Dispatchers.IO) {
-                    db.incomeDao().insertIncome(income)
-                    finish()
-                }
-            } else {
-                Toast.makeText(this, "Please fill in all fields correctly", Toast.LENGTH_SHORT).show()
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                binding.incomeCategorySpinner.adapter = adapter
             }
         }
     }

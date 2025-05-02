@@ -1,0 +1,5 @@
+<resources>
+    <style name="SpinnerTheme.WhiteText" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+</resources>

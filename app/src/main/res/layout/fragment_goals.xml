@@ -2,22 +2,26 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/ssb_blue"
+    android:gravity="center"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/ssb_blue">
+    android:padding="24dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Categories"
+        android:text="Your Budget Goals"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@android:color/white"
         android:layout_marginBottom="24dp" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="12dp" />
+    <Button
+        android:id="@+id/setGoalsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set Monthly Goals"
+        android:backgroundTint="@color/ssb_gold"
+        android:textColor="@color/ssb_blue"
+        android:padding="16dp"/>
 </LinearLayout>

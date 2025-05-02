@@ -5,13 +5,25 @@
     android:layout_height="match_parent"
     android:background="@color/ssb_blue">
 
+    <TextView
+        android:id="@+id/categoriesHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your Categories"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:layout_margin="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/categoryRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="16dp"
-        android:layout_above="@+id/addCategoryFab"
-        android:layout_alignParentTop="true" />
+        android:layout_below="@id/categoriesHeader"
+        android:layout_above="@+id/addCategoryFab" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addCategoryFab"

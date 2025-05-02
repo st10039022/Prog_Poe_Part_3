@@ -51,12 +51,13 @@
             android:id="@+id/dateEditText"
             android:layout_width="match_parent"
             android:layout_height="64dp"
+            android:hint="Date"
             android:focusable="false"
-            android:hint="Select Date"
+            android:clickable="false"
             android:textColor="@android:color/white"
             android:textColorHint="@android:color/white"
             android:backgroundTint="@android:color/white"
-            android:layout_marginTop="16dp"/>
+            android:layout_marginTop="16dp" />
 
         <Button
             android:id="@+id/saveExpenseButton"

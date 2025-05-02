@@ -22,6 +22,7 @@ class DashboardActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // set up view binding
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -34,10 +35,12 @@ class DashboardActivity : AppCompatActivity() {
 
             val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
 
+            // calculate total expense for current month
             val totalExpense = expenses
                 .filter { it.date.startsWith(currentMonth) }
                 .sumOf { it.amount }
 
+            // calculate total income for current month
             val totalIncome = incomes
                 .filter { it.date.startsWith(currentMonth) }
                 .sumOf { it.amount }
@@ -47,11 +50,12 @@ class DashboardActivity : AppCompatActivity() {
             val statusMessage: String
             val statusColor: Int
 
+            // determine spending status based on goals
             if (goals != null) {
                 statusMessage = when {
-                    totalExpense > goals.maxAmount -> "You've exceeded your budget"
-                    totalExpense < goals.minAmount -> "You're underspending"
-                    else -> "You're on track!"
+                    totalExpense > goals.maxAmount -> "you've exceeded your budget"
+                    totalExpense < goals.minAmount -> "you're underspending"
+                    else -> "you're on track!"
                 }
                 statusColor = when {
                     totalExpense > goals.maxAmount -> Color.RED
@@ -59,36 +63,39 @@ class DashboardActivity : AppCompatActivity() {
                     else -> Color.GREEN
                 }
             } else {
-                statusMessage = "No goals set"
+                statusMessage = "no goals set"
                 statusColor = Color.LTGRAY
             }
 
+            // group expenses by category and calculate totals
             val categorySums = expenses
                 .filter { it.date.startsWith(currentMonth) }
                 .groupBy { it.category }
                 .mapValues { entry -> entry.value.sumOf { it.amount } }
 
+            // create pie chart entries
             val entries = categorySums.map { (category, amount) ->
                 PieEntry(amount.toFloat(), category)
             }
 
-            val dataSet = PieDataSet(entries, "Expenses by Category")
+            val dataSet = PieDataSet(entries, "expenses by category")
             dataSet.colors = ColorTemplate.MATERIAL_COLORS.toList()
             dataSet.valueTextSize = 14f
             dataSet.valueTextColor = Color.WHITE
 
             val pieData = PieData(dataSet)
 
+            // update ui on main thread
             withContext(Dispatchers.Main) {
-                binding.incomeAmount.text = "R%.2f".format(totalIncome)
-                binding.expenseAmount.text = "R%.2f".format(totalExpense)
-                binding.balanceAmount.text = "R%.2f".format(balance)
+                binding.incomeAmount.text = "r%.2f".format(totalIncome)
+                binding.expenseAmount.text = "r%.2f".format(totalExpense)
+                binding.balanceAmount.text = "r%.2f".format(balance)
                 binding.statusText.text = statusMessage
                 binding.statusText.setTextColor(statusColor)
 
                 binding.expensePieChart.data = pieData
                 binding.expensePieChart.description.isEnabled = false
-                binding.expensePieChart.centerText = "Expenses"
+                binding.expensePieChart.centerText = "expenses"
                 binding.expensePieChart.setEntryLabelColor(Color.BLACK)
                 binding.expensePieChart.invalidate()
             }

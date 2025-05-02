@@ -16,15 +16,19 @@ class CategoryListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // set up view binding
         binding = ActivityCategoryListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // set layout manager for recycler view
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
 
+        // load categories from database
         lifecycleScope.launch {
             val categories = withContext(Dispatchers.IO) {
                 AppDatabase.getDatabase(this@CategoryListActivity).categoryDao().getAllCategories()
             }
+            // set adapter with category data
             binding.recyclerView.adapter = CategoryAdapter(categories)
         }
     }
