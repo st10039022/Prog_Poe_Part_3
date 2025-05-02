@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="@color/ssb_blue">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome to SSBBudgetTracker"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp" />
+
+    <Button
+        android:id="@+id/addCategoryButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Category"
+        android:backgroundTint="@color/ssb_gold"
+        android:textColor="@color/ssb_blue"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/viewCategoriesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Categories"
+        android:backgroundTint="@color/ssb_gold"
+        android:textColor="@color/ssb_blue"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/addExpenseButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Expense"
+        android:backgroundTint="@color/ssb_gold"
+        android:textColor="@color/ssb_blue"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/viewExpensesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Expenses"
+        android:backgroundTint="@color/ssb_gold"
+        android:textColor="@color/ssb_blue"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/setGoalsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Set Goals"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/ssb_gold"
+        android:textColor="@color/ssb_blue"/>
+
+    <Button
+        android:id="@+id/addIncomeButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Income"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/ssb_gold"
+        android:textColor="@color/ssb_blue" />
+
+    <Button
+        android:id="@+id/viewIncomeButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Income"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="@color/ssb_gold"
+        android:textColor="@color/ssb_blue" />
+
+    <Button
+        android:id="@+id/addIncomeCategoryButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Income Category"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="@color/ssb_gold"
+        android:textColor="@color/ssb_blue" />
+
+    <Button
+        android:id="@+id/openDashboardButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Dashboard"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/ssb_gold"
+        android:textColor="@color/ssb_blue" />
+
+
+</LinearLayout>
