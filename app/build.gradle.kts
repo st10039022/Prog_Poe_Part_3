@@ -52,11 +52,11 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    // ROOM DATABASE
+    // Room Database
     implementation("androidx.room:room-runtime:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
 
     // MPAndroidChart
-    implementation("com.github.PhilJay:MPAndroidChart:3.1.0")
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 }

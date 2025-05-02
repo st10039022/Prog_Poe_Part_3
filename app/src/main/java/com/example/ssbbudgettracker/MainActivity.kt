@@ -1,8 +1,8 @@
 package com.example.ssbbudgettracker
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import com.example.ssbbudgettracker.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -14,40 +14,23 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.addCategoryButton.setOnClickListener {
-            startActivity(Intent(this, AddCategoryActivity::class.java))
-        }
+        // Load default fragment
+        loadFragment(DashboardFragment())
 
-        binding.viewCategoriesButton.setOnClickListener {
-            startActivity(Intent(this, CategoryListActivity::class.java))
+        binding.bottomNav.setOnItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.nav_dashboard -> loadFragment(DashboardFragment())
+                R.id.nav_expenses -> loadFragment(ExpensesFragment())
+                R.id.nav_income -> loadFragment(IncomeFragment())
+                R.id.nav_categories -> loadFragment(CategoriesFragment())
+            }
+            true
         }
+    }
 
-        binding.addExpenseButton.setOnClickListener {
-            startActivity(Intent(this, AddExpenseActivity::class.java))
-        }
-
-        binding.viewExpensesButton.setOnClickListener {
-            startActivity(Intent(this, ExpenseListActivity::class.java))
-        }
-        binding.setGoalsButton.setOnClickListener {
-            startActivity(Intent(this, SetGoalsActivity::class.java))
-        }
-
-        binding.addIncomeButton.setOnClickListener {
-            startActivity(Intent(this, AddIncomeActivity::class.java))
-        }
-
-        binding.viewIncomeButton.setOnClickListener {
-            startActivity(Intent(this, IncomeListActivity::class.java))
-        }
-
-        binding.addIncomeCategoryButton.setOnClickListener {
-            startActivity(Intent(this, AddIncomeCategoryActivity::class.java))
-        }
-
-        binding.openDashboardButton.setOnClickListener {
-            startActivity(Intent(this, DashboardActivity::class.java))
-        }
-
+    private fun loadFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
     }
 }

@@ -1,15 +1,15 @@
 package com.example.ssbbudgettracker
 
-import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ssbbudgettracker.data.ExpenseEntity
 import com.example.ssbbudgettracker.databinding.ItemExpenseBinding
-import java.io.File
 
-class ExpenseAdapter(private val expenses: List<ExpenseEntity>) :
-    RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
+class ExpenseAdapter(
+    private var expenses: List<ExpenseEntity>
+) : RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
 
     inner class ExpenseViewHolder(val binding: ItemExpenseBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -21,23 +21,17 @@ class ExpenseAdapter(private val expenses: List<ExpenseEntity>) :
 
     override fun onBindViewHolder(holder: ExpenseViewHolder, position: Int) {
         val expense = expenses[position]
-        holder.binding.categoryText.text = expense.category
-        holder.binding.amountText.text = "R${expense.amount}"
-        holder.binding.dateText.text = expense.date
-        holder.binding.descriptionText.text = expense.description
 
-        if (!expense.photoUri.isNullOrEmpty()) {
-            val imageFile = File(expense.photoUri)
-            if (imageFile.exists()) {
-                holder.binding.photoView.setImageURI(Uri.fromFile(imageFile))
-                holder.binding.photoView.visibility = android.view.View.VISIBLE
-            } else {
-                holder.binding.photoView.visibility = android.view.View.GONE
-            }
-        } else {
-            holder.binding.photoView.visibility = android.view.View.GONE
-        }
+        holder.binding.expenseCategory.text = expense.category
+        holder.binding.expenseAmount.text = "R%.2f".format(expense.amount)
+        holder.binding.expenseDescription.text = expense.description
+        holder.binding.expenseDate.text = expense.date
     }
 
     override fun getItemCount(): Int = expenses.size
+
+    fun updateData(newExpenses: List<ExpenseEntity>) {
+        expenses = newExpenses
+        notifyDataSetChanged()
+    }
 }

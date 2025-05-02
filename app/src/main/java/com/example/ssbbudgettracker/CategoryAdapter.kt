@@ -6,8 +6,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.ssbbudgettracker.data.CategoryEntity
 import com.example.ssbbudgettracker.databinding.ItemCategoryBinding
 
-class CategoryAdapter(private val categories: List<CategoryEntity>) :
-    RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>() {
+class CategoryAdapter(
+    private var categories: List<CategoryEntity>
+) : RecyclerView.Adapter<CategoryAdapter.CategoryViewHolder>() {
 
     inner class CategoryViewHolder(val binding: ItemCategoryBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -19,8 +20,13 @@ class CategoryAdapter(private val categories: List<CategoryEntity>) :
 
     override fun onBindViewHolder(holder: CategoryViewHolder, position: Int) {
         val category = categories[position]
-        holder.binding.categoryNameText.text = category.name
+        holder.binding.categoryName.text = category.name
     }
 
     override fun getItemCount(): Int = categories.size
+
+    fun updateData(newCategories: List<CategoryEntity>) {
+        categories = newCategories
+        notifyDataSetChanged()
+    }
 }

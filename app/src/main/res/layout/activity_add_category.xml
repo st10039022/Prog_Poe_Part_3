@@ -27,21 +27,13 @@
         android:layout_marginTop="32dp"/>
 
     <Spinner
-        android:id="@+id/iconSpinner"
+        android:id="@+id/categoryTypeSpinner"
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:layout_marginTop="24dp"
-        android:popupBackground="@android:color/white"
         android:backgroundTint="@android:color/white"
+        android:popupBackground="@android:color/white"
         android:theme="@style/ThemeOverlay.AppCompat.Dark"/>
-
-    <ImageView
-        android:id="@+id/previewIcon"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
-        android:layout_marginTop="16dp"
-        android:background="@android:color/white"
-        android:padding="8dp" />
 
     <Button
         android:id="@+id/saveCategoryButton"

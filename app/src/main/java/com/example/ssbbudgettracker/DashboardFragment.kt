@@ -2,10 +2,13 @@ package com.example.ssbbudgettracker
 
 import android.graphics.Color
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.ssbbudgettracker.data.AppDatabase
-import com.example.ssbbudgettracker.databinding.ActivityDashboardBinding
+import com.example.ssbbudgettracker.databinding.FragmentDashboardBinding
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -16,16 +19,23 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
-class DashboardActivity : AppCompatActivity() {
+class DashboardFragment : Fragment() {
 
-    private lateinit var binding: ActivityDashboardBinding
+    private var _binding: FragmentDashboardBinding? = null
+    private val binding get() = _binding!!
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityDashboardBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentDashboardBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        val db = AppDatabase.getDatabase(this)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val db = AppDatabase.getDatabase(requireContext())
 
         lifecycleScope.launch(Dispatchers.IO) {
             val expenses = db.expenseDao().getAllExpenses()
@@ -93,5 +103,10 @@ class DashboardActivity : AppCompatActivity() {
                 binding.expensePieChart.invalidate()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
