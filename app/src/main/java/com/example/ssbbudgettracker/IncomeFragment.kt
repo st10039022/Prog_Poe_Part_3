@@ -6,24 +6,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.ssbbudgettracker.data.AppDatabase
-import com.example.ssbbudgettracker.data.IncomeEntity
+import com.example.ssbbudgettracker.adapter.IncomeAdapter
 import com.example.ssbbudgettracker.databinding.FragmentIncomeBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.ssbbudgettracker.viewmodel.IncomeViewModel
 
 class IncomeFragment : Fragment() {
 
     private var _binding: FragmentIncomeBinding? = null
     private val binding get() = _binding!!
 
+    private val viewModel: IncomeViewModel by viewModels()
     private lateinit var adapter: IncomeAdapter
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentIncomeBinding.inflate(inflater, container, false)
@@ -33,25 +32,20 @@ class IncomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = IncomeAdapter(emptyList())
+        adapter = IncomeAdapter()
         binding.incomeRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.incomeRecyclerView.adapter = adapter
 
-        binding.addIncomeFab.setOnClickListener {
-            startActivity(Intent(requireContext(), AddIncomeActivity::class.java))
+        viewModel.incomes.observe(viewLifecycleOwner) {
+            adapter.updateData(it)
         }
 
-        loadIncomes()
-    }
+        viewModel.error.observe(viewLifecycleOwner) {
+            it.printStackTrace()
+        }
 
-    private fun loadIncomes() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val db = AppDatabase.getDatabase(requireContext())
-            val incomes = db.incomeDao().getAllIncomes()
-
-            withContext(Dispatchers.Main) {
-                adapter.updateData(incomes)
-            }
+        binding.addIncomeFab.setOnClickListener {
+            startActivity(Intent(requireContext(), AddIncomeActivity::class.java))
         }
     }
 

@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_expenses -> loadFragment(ExpensesFragment())
                 R.id.nav_income -> loadFragment(IncomeFragment())
                 R.id.nav_categories -> loadFragment(CategoriesFragment())
-                R.id.nav_goals -> loadFragment(GoalsFragment()) // ✅ ADDED
+                R.id.nav_goals -> loadFragment(GoalsFragment())
             }
             true
         }

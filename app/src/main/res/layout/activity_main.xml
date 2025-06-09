@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/ssb_blue">
+    android:background="@color/ssb_blue"
+    android:fitsSystemWindows="true">
 
     <FrameLayout
         android:id="@+id/fragment_container"
@@ -20,4 +21,5 @@
         app:itemIconTint="@color/ssb_blue"
         app:itemTextColor="@color/ssb_blue"
         app:menu="@menu/bottom_nav_menu" />
+
 </LinearLayout>

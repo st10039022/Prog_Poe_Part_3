@@ -2,103 +2,126 @@ package com.example.ssbbudgettracker
 
 import android.graphics.Color
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.example.ssbbudgettracker.data.AppDatabase
 import com.example.ssbbudgettracker.databinding.ActivityDashboardBinding
+import com.example.ssbbudgettracker.model.Expense
+import com.example.ssbbudgettracker.model.Goal
+import com.example.ssbbudgettracker.model.Income
+import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.utils.ColorTemplate
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 
 class DashboardActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDashboardBinding
+    private val db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // set up view binding
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val db = AppDatabase.getDatabase(this)
+        fetchDashboardData()
+    }
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            val expenses = db.expenseDao().getAllExpenses()
-            val incomes = db.incomeDao().getAllIncomes()
-            val goals = db.goalDao().getGoals()
+    private fun fetchDashboardData() {
+        val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
 
-            val currentMonth = SimpleDateFormat("yyyy-MM", Locale.getDefault()).format(Date())
+        db.collection("expenses")
+            .whereGreaterThanOrEqualTo("date", "$currentMonth-01")
+            .whereLessThanOrEqualTo("date", "$currentMonth-31")
+            .get()
+            .addOnSuccessListener { expenseSnapshot ->
+                val expenses = expenseSnapshot.toObjects(Expense::class.java)
+                val totalExpense = expenses.sumOf { it.amount }
 
-            // calculate total expense for current month
-            val totalExpense = expenses
-                .filter { it.date.startsWith(currentMonth) }
-                .sumOf { it.amount }
-
-            // calculate total income for current month
-            val totalIncome = incomes
-                .filter { it.date.startsWith(currentMonth) }
-                .sumOf { it.amount }
-
-            val balance = totalIncome - totalExpense
-
-            val statusMessage: String
-            val statusColor: Int
-
-            // determine spending status based on goals
-            if (goals != null) {
-                statusMessage = when {
-                    totalExpense > goals.maxAmount -> "you've exceeded your budget"
-                    totalExpense < goals.minAmount -> "you're underspending"
-                    else -> "you're on track!"
+                val entries = mutableMapOf<String, Double>()
+                expenses.forEach {
+                    entries[it.category] = (entries[it.category] ?: 0.0) + it.amount
                 }
-                statusColor = when {
-                    totalExpense > goals.maxAmount -> Color.RED
-                    totalExpense < goals.minAmount -> Color.YELLOW
-                    else -> Color.GREEN
-                }
-            } else {
-                statusMessage = "no goals set"
-                statusColor = Color.LTGRAY
+
+                drawPieChart(entries)
+                binding.expenseAmount.text = "R%.2f".format(totalExpense)
+
+                db.collection("incomes")
+                    .whereGreaterThanOrEqualTo("date", "$currentMonth-01")
+                    .whereLessThanOrEqualTo("date", "$currentMonth-31")
+                    .get()
+                    .addOnSuccessListener { incomeSnapshot ->
+                        val incomes = incomeSnapshot.toObjects(Income::class.java)
+                        val totalIncome = incomes.sumOf { it.amount }
+                        val balance = totalIncome - totalExpense
+
+                        binding.incomeAmount.text = "R%.2f".format(totalIncome)
+                        binding.balanceAmount.text = "R%.2f".format(balance)
+
+                        db.collection("goals").document(currentMonth)
+                            .get()
+                            .addOnSuccessListener { goalDoc ->
+                                val goal = goalDoc.toObject(Goal::class.java)
+                                updateGoalStatus(goal, totalExpense)
+                            }
+                            .addOnFailureListener {
+                                binding.statusText.text = "No goal set for this month."
+                            }
+                    }
             }
-
-            // group expenses by category and calculate totals
-            val categorySums = expenses
-                .filter { it.date.startsWith(currentMonth) }
-                .groupBy { it.category }
-                .mapValues { entry -> entry.value.sumOf { it.amount } }
-
-            // create pie chart entries
-            val entries = categorySums.map { (category, amount) ->
-                PieEntry(amount.toFloat(), category)
+            .addOnFailureListener {
+                Toast.makeText(this, "Failed to load dashboard data", Toast.LENGTH_SHORT).show()
             }
+    }
 
-            val dataSet = PieDataSet(entries, "expenses by category")
-            dataSet.colors = ColorTemplate.MATERIAL_COLORS.toList()
-            dataSet.valueTextSize = 14f
-            dataSet.valueTextColor = Color.WHITE
+    private fun updateGoalStatus(goal: Goal?, totalExpense: Double) {
+        if (goal == null) {
+            binding.statusText.text = "No goals set"
+            return
+        }
 
-            val pieData = PieData(dataSet)
+        val statusText: String
+        val color: Int
 
-            // update ui on main thread
-            withContext(Dispatchers.Main) {
-                binding.incomeAmount.text = "r%.2f".format(totalIncome)
-                binding.expenseAmount.text = "r%.2f".format(totalExpense)
-                binding.balanceAmount.text = "r%.2f".format(balance)
-                binding.statusText.text = statusMessage
-                binding.statusText.setTextColor(statusColor)
-
-                binding.expensePieChart.data = pieData
-                binding.expensePieChart.description.isEnabled = false
-                binding.expensePieChart.centerText = "expenses"
-                binding.expensePieChart.setEntryLabelColor(Color.BLACK)
-                binding.expensePieChart.invalidate()
+        when {
+            totalExpense < goal.minAmount -> {
+                statusText = "You're under your minimum goal"
+                color = Color.BLUE
             }
+            totalExpense > goal.maxAmount -> {
+                statusText = "You're over your maximum goal!"
+                color = Color.RED
+            }
+            else -> {
+                statusText = "You're within your goal range"
+                color = Color.GREEN
+            }
+        }
+
+        binding.statusText.text = statusText
+        binding.statusText.setTextColor(color)
+    }
+
+    private fun drawPieChart(categoryTotals: Map<String, Double>) {
+        val entries = categoryTotals.map { PieEntry(it.value.toFloat(), it.key) }
+        val dataSet = PieDataSet(entries, "Expenses by Category")
+        dataSet.setColors(
+            Color.rgb(244, 67, 54),
+            Color.rgb(33, 150, 243),
+            Color.rgb(76, 175, 80),
+            Color.rgb(255, 193, 7),
+            Color.rgb(156, 39, 176)
+        )
+
+        val data = PieData(dataSet)
+        binding.expensePieChart.apply {
+            this.data = data
+            description.isEnabled = false
+            legend.isEnabled = true
+            setUsePercentValues(true)
+            invalidate()
         }
     }
 }

@@ -1,89 +1,45 @@
 package com.example.ssbbudgettracker
 
-import android.app.DatePickerDialog
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.ssbbudgettracker.data.AppDatabase
+import com.example.ssbbudgettracker.adapter.ExpenseAdapter
 import com.example.ssbbudgettracker.databinding.ActivityExpenseListBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.text.SimpleDateFormat
-import java.util.*
+import com.example.ssbbudgettracker.model.Expense
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ExpenseListActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityExpenseListBinding
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    private lateinit var adapter: ExpenseAdapter
+    private val db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityExpenseListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        adapter = ExpenseAdapter()
         binding.expenseRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.expenseRecyclerView.adapter = adapter
 
-        val calendar = Calendar.getInstance()
-        val today = dateFormat.format(calendar.time)
-        val firstDay = dateFormat.format(calendar.apply { set(Calendar.DAY_OF_MONTH, 1) }.time)
-
-        binding.startDateEditText.setText(firstDay)
-        binding.endDateEditText.setText(today)
-
-        binding.startDateEditText.setOnClickListener {
-            showDatePicker { selected ->
-                binding.startDateEditText.setText(selected)
-            }
-        }
-
-        binding.endDateEditText.setOnClickListener {
-            showDatePicker { selected ->
-                binding.endDateEditText.setText(selected)
-            }
-        }
-
-        binding.filterExpensesButton.setOnClickListener {
-            val start = binding.startDateEditText.text.toString()
-            val end = binding.endDateEditText.text.toString()
-
-            if (start.isNotEmpty() && end.isNotEmpty()) {
-                loadExpenses(start, end)
-            } else {
-                Toast.makeText(this, "Please select both dates", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        loadExpenses(firstDay, today)
+        loadExpenses()
     }
 
-    private fun showDatePicker(callback: (String) -> Unit) {
-        val now = Calendar.getInstance()
-        DatePickerDialog(
-            this,
-            { _, year, month, dayOfMonth ->
-                val selected = Calendar.getInstance()
-                selected.set(year, month, dayOfMonth)
-                callback(dateFormat.format(selected.time))
-            },
-            now.get(Calendar.YEAR),
-            now.get(Calendar.MONTH),
-            now.get(Calendar.DAY_OF_MONTH)
-        ).show()
+    private fun loadExpenses() {
+        val prefs = getSharedPreferences("ssb_prefs", MODE_PRIVATE)
+        val userId = prefs.getString("logged_in_user_id", "") ?: return
+
+        db.collection("users").document(userId).collection("expenses")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val expenses = snapshot.toObjects(Expense::class.java)
+                adapter.updateData(expenses)
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Failed to load expenses", Toast.LENGTH_SHORT).show()
+            }
     }
 
-    private fun loadExpenses(startDate: String, endDate: String) {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val db = AppDatabase.getDatabase(this@ExpenseListActivity)
-            val all = db.expenseDao().getAllExpenses()
-            val filtered = all.filter {
-                it.date >= startDate && it.date <= endDate
-            }
-            withContext(Dispatchers.Main) {
-                binding.expenseRecyclerView.adapter = ExpenseAdapter(filtered)
-            }
-        }
-    }
 }

@@ -4,57 +4,48 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
-import com.example.ssbbudgettracker.data.AppDatabase
-import com.example.ssbbudgettracker.data.CategoryEntity
 import com.example.ssbbudgettracker.databinding.ActivityAddCategoryBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.ssbbudgettracker.model.Category
+import com.google.firebase.firestore.FirebaseFirestore
 
 class AddCategoryActivity : AppCompatActivity() {
 
-    // sets up view binding for this screen
     private lateinit var binding: ActivityAddCategoryBinding
+    private val db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddCategoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // dropdown options for category type
-        val typeOptions = listOf("Expense", "Income")
-
-        // sets up the spinner with "expense" and "income"
-        val adapter = ArrayAdapter(this, R.layout.spinner_item, typeOptions)
+        // Set up spinner with "Income" and "Expense"
+        val types = listOf("Income", "Expense")
+        val adapter = ArrayAdapter(this, R.layout.spinner_item, types)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.categoryTypeSpinner.adapter = adapter
 
-        // when save button is clicked
+        // Save Category Button Logic
         binding.saveCategoryButton.setOnClickListener {
-            val name = binding.categoryNameEditText.text.toString().trim() // get name
-            val type = binding.categoryTypeSpinner.selectedItem.toString() // get selected type
+            val name = binding.categoryNameEditText.text.toString().trim()
+            val type = binding.categoryTypeSpinner.selectedItem?.toString()?.lowercase() ?: ""
 
-            // show error if name is empty
             if (name.isEmpty()) {
-                Toast.makeText(this, "Enter category name", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please enter a category name", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // create category object
-            val category = CategoryEntity(name = name, type = type)
+            val docRef = db.collection("categories").document()
+            val category = Category(id = docRef.id, name = name, type = type)
 
-            // insert category into the database
-            lifecycleScope.launch(Dispatchers.IO) {
-                val db = AppDatabase.getDatabase(applicationContext)
-                db.categoryDao().insertCategory(category)
-
-                // show success message on the main thread
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@AddCategoryActivity, "Category saved", Toast.LENGTH_SHORT).show()
-                    finish() // close the screen
+            docRef.set(category)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Category added", Toast.LENGTH_SHORT).show()
+                    finish()
                 }
-            }
+                .addOnFailureListener { e ->
+                    e.printStackTrace()
+                    Toast.makeText(this, "Failed to add category: ${e.message}", Toast.LENGTH_LONG).show()
+                }
         }
     }
 }

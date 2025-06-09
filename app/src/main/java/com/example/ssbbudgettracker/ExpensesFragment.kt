@@ -6,16 +6,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.ssbbudgettracker.data.AppDatabase
-import com.example.ssbbudgettracker.data.ExpenseEntity
+import com.example.ssbbudgettracker.adapter.ExpenseAdapter
 import com.example.ssbbudgettracker.databinding.FragmentExpensesBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.ssbbudgettracker.viewmodel.ExpenseViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,13 +22,16 @@ class ExpensesFragment : Fragment() {
     private var _binding: FragmentExpensesBinding? = null
     private val binding get() = _binding!!
 
+    private val viewModel: ExpenseViewModel by viewModels()
     private lateinit var adapter: ExpenseAdapter
-    private var allExpenses: List<ExpenseEntity> = emptyList()
 
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    private var startDate: Date? = null
+    private var endDate: Date? = null
+    private var selectedCategory: String? = null
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentExpensesBinding.inflate(inflater, container, false)
@@ -40,90 +41,60 @@ class ExpensesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = ExpenseAdapter(emptyList())
+        adapter = ExpenseAdapter()
         binding.expensesRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.expensesRecyclerView.adapter = adapter
 
-        binding.addExpenseFab.setOnClickListener {
+        val categories = listOf("All", "Food", "Transport", "Health", "Entertainment")
+        val spinnerAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, categories)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.categorySpinner.adapter = spinnerAdapter
+
+        binding.categorySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                selectedCategory = if (position == 0) null else categories[position]
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        binding.startDateButton.setOnClickListener {
+            val cal = Calendar.getInstance()
+            DatePickerDialog(requireContext(), { _, year, month, day ->
+                cal.set(year, month, day)
+                startDate = cal.time
+                binding.startDateText.text = dateFormat.format(startDate!!)
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
+        }
+
+        binding.endDateButton.setOnClickListener {
+            val cal = Calendar.getInstance()
+            DatePickerDialog(requireContext(), { _, year, month, day ->
+                cal.set(year, month, day)
+                endDate = cal.time
+                binding.endDateText.text = dateFormat.format(endDate!!)
+            }, cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH)).show()
+        }
+
+        binding.applyFilterButton.setOnClickListener {
+            viewModel.loadExpenses(selectedCategory, startDate, endDate)
+        }
+
+        binding.addExpenseButton.setOnClickListener {
             startActivity(Intent(requireContext(), AddExpenseActivity::class.java))
         }
 
-        binding.startDateInput.setOnClickListener {
-            showDatePicker { selectedDate ->
-                binding.startDateInput.setText(selectedDate)
-            }
+        viewModel.expenses.observe(viewLifecycleOwner) { expenses ->
+            adapter.updateData(expenses)
         }
 
-        binding.endDateInput.setOnClickListener {
-            showDatePicker { selectedDate ->
-                binding.endDateInput.setText(selectedDate)
-            }
+        viewModel.error.observe(viewLifecycleOwner) { e ->
+            e.printStackTrace()
         }
 
-        binding.filterButton.setOnClickListener {
-            val startDate = binding.startDateInput.text.toString()
-            val endDate = binding.endDateInput.text.toString()
-
-            if (startDate.isEmpty() || endDate.isEmpty()) {
-                Toast.makeText(requireContext(), "Please select both dates", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val filtered = allExpenses.filter {
-                it.date >= startDate && it.date <= endDate
-            }
-
-            adapter.updateData(filtered)
-            showCategoryTotals(filtered)
-        }
-
-        loadExpenses()
-    }
-
-    private fun showDatePicker(onDateSelected: (String) -> Unit) {
-        val calendar = Calendar.getInstance()
-        DatePickerDialog(
-            requireContext(),
-            { _, year, month, day ->
-                val formatted = String.format("%04d-%02d-%02d", year, month + 1, day)
-                onDateSelected(formatted)
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
-    }
-
-    private fun showCategoryTotals(expenses: List<ExpenseEntity>) {
-        val totalsByCategory = expenses.groupBy { it.category }
-            .mapValues { it.value.sumOf { e -> e.amount } }
-
-        val summary = totalsByCategory.entries.joinToString("\n") { (category, total) ->
-            "$category: R%.2f".format(total)
-        }
-
-        androidx.appcompat.app.AlertDialog.Builder(requireContext())
-            .setTitle("Category Totals")
-            .setMessage(summary.ifEmpty { "No expenses found in this range." })
-            .setPositiveButton("OK", null)
-            .show()
-    }
-
-    private fun loadExpenses() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val db = AppDatabase.getDatabase(requireContext())
-            val expenses = db.expenseDao().getAllExpenses()
-            allExpenses = expenses
-
-            withContext(Dispatchers.Main) {
-                adapter.updateData(expenses)
-            }
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        loadExpenses()
+        viewModel.loadExpenses()
     }
 
     override fun onDestroyView() {

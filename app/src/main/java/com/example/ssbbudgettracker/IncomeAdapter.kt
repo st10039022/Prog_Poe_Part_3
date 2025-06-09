@@ -1,17 +1,16 @@
-package com.example.ssbbudgettracker
+package com.example.ssbbudgettracker.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.ssbbudgettracker.data.IncomeEntity
 import com.example.ssbbudgettracker.databinding.ItemIncomeBinding
+import com.example.ssbbudgettracker.model.Income
 
-class IncomeAdapter(
-    private var incomes: List<IncomeEntity>
-) : RecyclerView.Adapter<IncomeAdapter.IncomeViewHolder>() {
+class IncomeAdapter : RecyclerView.Adapter<IncomeAdapter.IncomeViewHolder>() {
 
-    inner class IncomeViewHolder(val binding: ItemIncomeBinding) :
-        RecyclerView.ViewHolder(binding.root)
+    private var incomes: List<Income> = emptyList()
+
+    inner class IncomeViewHolder(val binding: ItemIncomeBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): IncomeViewHolder {
         val binding = ItemIncomeBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -28,8 +27,8 @@ class IncomeAdapter(
 
     override fun getItemCount(): Int = incomes.size
 
-    fun updateData(newIncomes: List<IncomeEntity>) {
-        incomes = newIncomes
+    fun updateData(newList: List<Income>) {
+        incomes = newList
         notifyDataSetChanged()
     }
 }

@@ -1,83 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/ssb_blue">
+    android:orientation="vertical"
+    android:background="@color/ssb_blue"
+    android:padding="16dp">
 
     <TextView
-        android:id="@+id/expensesHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Your Expenses"
+        android:text="Expenses"
+        android:textColor="@android:color/white"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:textColor="@android:color/white"
-        android:layout_margin="16dp"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true" />
+        android:layout_marginBottom="8dp" />
+
+    <Spinner
+        android:id="@+id/categorySpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp" />
 
     <LinearLayout
-        android:id="@+id/filterSection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
-        android:background="@android:color/white"
-        android:layout_below="@id/expensesHeader">
-
-        <EditText
-            android:id="@+id/startDateInput"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:hint="Start Date"
-            android:focusable="false"
-            android:backgroundTint="@color/ssb_blue"
-            android:textColor="@android:color/black"
-            android:padding="8dp" />
-
-        <EditText
-            android:id="@+id/endDateInput"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:hint="End Date"
-            android:focusable="false"
-            android:backgroundTint="@color/ssb_blue"
-            android:textColor="@android:color/black"
-            android:padding="8dp"
-            android:layout_marginStart="8dp" />
+        android:layout_marginBottom="8dp">
 
         <Button
-            android:id="@+id/filterButton"
+            android:id="@+id/startDateButton"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:text="Filter"
+            android:layout_height="wrap_content"
+            android:text="Start Date" />
+
+        <TextView
+            android:id="@+id/startDateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:backgroundTint="@color/ssb_gold"
-            android:textColor="@color/ssb_blue"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
+            android:text="Not set"
+            android:textColor="@android:color/white" />
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <Button
+            android:id="@+id/endDateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="End Date" />
+
+        <TextView
+            android:id="@+id/endDateText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Not set"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/applyFilterButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Apply Filter"
+        android:layout_marginBottom="8dp"
+        android:backgroundTint="@color/ssb_gold"
+        android:textColor="@color/ssb_blue" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/expensesRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/filterSection"
-        android:layout_above="@id/addExpenseFab"
-        android:padding="16dp" />
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingTop="8dp" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addExpenseFab"
-        android:layout_width="wrap_content"
+    <Button
+        android:id="@+id/addExpenseButton"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_input_add"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_margin="16dp"
-        android:contentDescription="Add new expense"
-        app:backgroundTint="@color/ssb_gold"
-        app:tint="@color/ssb_blue" />
-</RelativeLayout>
+        android:text="Add Expense"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/ssb_gold"
+        android:textColor="@color/ssb_blue" />
+
+</LinearLayout>

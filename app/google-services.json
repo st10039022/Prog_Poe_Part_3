@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "816271182159",
+    "project_id": "ssbbudgettracker",
+    "storage_bucket": "ssbbudgettracker.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:816271182159:android:5f868e4be877debfce1d3a",
+        "android_client_info": {
+          "package_name": "com.example.ssbbudgettracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCk_3Re8-wBjPFxRXnJ1GZRo42gvxx4riw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

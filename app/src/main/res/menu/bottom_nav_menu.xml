@@ -24,7 +24,6 @@
     <item
         android:id="@+id/nav_goals"
         android:icon="@drawable/ic_goal"
-    android:title="Goals" />
-
+        android:title="Goals" />
 
 </menu>
